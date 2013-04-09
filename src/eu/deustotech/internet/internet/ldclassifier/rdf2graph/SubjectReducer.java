@@ -6,19 +6,17 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class SubjectReducer extends Reducer<Text, Text, Text, LongWritable> {
+public class SubjectReducer extends Reducer<Text, Text, Text, Text> {
 
 	@Override
 	public void reduce(Text key, Iterable<Text> values, Context context) {
-		
-		
-		long count = 0;
-		for (Text value : values) {
-			count++;
-		}
-		
 		try {
-			context.write(key, new LongWritable(count));
+			System.out.println("Reducing");
+			for (Text value : values) {
+				context.write(key, value);
+			}
+
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -26,6 +24,6 @@ public class SubjectReducer extends Reducer<Text, Text, Text, LongWritable> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 }
