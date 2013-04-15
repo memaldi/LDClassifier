@@ -123,7 +123,7 @@ public class SubjectMapper extends Mapper<LongWritable, Text, Text, Text> {
 					Bytes.toBytes(subjectClass));
 			p.add(Bytes.toBytes("nodes"), Bytes.toBytes("subject"),
 					Bytes.toBytes(subject));
-			context.write(new Text(dataset), new Text(subject));
+			context.write(new Text(String.valueOf(id)), new Text(subject));
 			id++;
 
 			table.put(p);
