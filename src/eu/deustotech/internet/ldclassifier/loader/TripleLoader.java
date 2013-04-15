@@ -22,7 +22,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class TripleLoader {
 
@@ -87,15 +87,18 @@ public class TripleLoader {
 			for (Text value : values) {
 				if (!subjects.contains(value.toString())) {
 					try {
-						System.out.println(String.format("%s - %s - %s", key, value, i));
+						System.out.println(String.format("%s - %s - %s", key,
+								value, i));
 						context.write(key, value);
 
 						HTable table = getTable(key);
 						Put p = new Put(Bytes.toBytes(value.toString()));
 						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("id"),
 								Bytes.toBytes(String.valueOf(i)));
+						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("type"),
+								Bytes.toBytes("v"));
 						table.put(p);
-						
+
 						subjects.add(value.toString());
 						i++;
 					} catch (IOException e) {
@@ -141,6 +144,7 @@ public class TripleLoader {
 	public static void run(String input, String output) {
 
 		Configuration loadConfig = new Configuration();
+		loadConfig.set("mapred.textoutputformat.separator", ",");
 		try {
 
 			preLoad();
@@ -149,14 +153,13 @@ public class TripleLoader {
 			loadJob.setJarByClass(TripleLoader.class);
 			loadJob.setJobName("[LDClassifier]LoadJob");
 			FileInputFormat.addInputPath(loadJob, new Path(input));
-			FileOutputFormat.setOutputPath(loadJob, new Path(output));
-			
+			TextOutputFormat.setOutputPath(loadJob, new Path(output));
+
 			loadJob.setMapOutputKeyClass(Text.class);
 			loadJob.setMapOutputValueClass(Text.class);
 			loadJob.setOutputKeyClass(Text.class);
 			loadJob.setOutputValueClass(Text.class);
-			
-			
+
 			loadJob.setMapperClass(TripleLoaderMapper.class);
 			loadJob.setReducerClass(TripleLoaderReducer.class);
 

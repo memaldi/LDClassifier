@@ -1,5 +1,6 @@
 package eu.deustotech.internet.ldclassifier.main;
 
+import eu.deustotech.internet.ldclassifier.edgegenerator.EdgeGenerator;
 import eu.deustotech.internet.ldclassifier.loader.TripleLoader;
 
 public class LDClassifier {
@@ -13,8 +14,8 @@ public class LDClassifier {
 		}
 
 		if ("load".equals(args[0]) && args.length == 3) {
-			TripleLoader.run(args[1], args[2]);
-			
+			//TripleLoader.run(args[1], args[2]);
+			EdgeGenerator.run(args[2]);
 		}
 		
 	}
