@@ -2,6 +2,7 @@ package eu.deustotech.internet.ldclassifier.loader;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
@@ -11,9 +12,11 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -83,24 +86,53 @@ public class TripleLoader {
 
 			Set<String> subjects = new HashSet<String>();
 			int i = 1;
+			HTable dTable = null;
+			try {
+				dTable = getTable(new Text("datasets"));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			Get get = null;
 
 			for (Text value : values) {
 				if (!subjects.contains(value.toString())) {
 					try {
-						System.out.println(String.format("%s - %s - %s", key,
-								value, i));
-						context.write(key, value);
 
-						HTable table = getTable(key);
-						Put p = new Put(Bytes.toBytes(value.toString()));
-						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("id"),
-								Bytes.toBytes(String.valueOf(i)));
-						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("type"),
-								Bytes.toBytes("v"));
-						table.put(p);
+						get = new Get(Bytes.toBytes(value.toString()));
+						//get.addFamily(Bytes.toBytes("p"));
 
-						subjects.add(value.toString());
-						i++;
+						Result result = dTable.get(get);
+						Map<byte[], byte[]> familyMap = result
+								.getFamilyMap(Bytes.toBytes("p"));
+						
+						boolean type = false;
+						for (byte[] fKey : familyMap.keySet()) {
+							System.out.println(String.format("%s - %s", new String(fKey), new String(familyMap.get(fKey))));
+							String typeStr = new String(familyMap.get(fKey));
+							if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>".equals(typeStr)) {
+								type = true;
+							}
+						}
+						
+						if (type) {
+
+							System.out.println(String.format("%s - %s - %s",
+									key, value, i));
+							context.write(key, value);
+
+							HTable table = getTable(key);
+							Put p = new Put(Bytes.toBytes(value.toString()));
+							p.add(Bytes.toBytes("subdue"), Bytes.toBytes("id"),
+									Bytes.toBytes(String.valueOf(i)));
+							p.add(Bytes.toBytes("subdue"),
+									Bytes.toBytes("type"), Bytes.toBytes("v"));
+							table.put(p);
+
+							subjects.add(value.toString());
+							i++;
+						}
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

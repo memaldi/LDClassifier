@@ -56,7 +56,7 @@ public class FileWriter {
 				//System.out.println(nodeClass);
 				String line = String.format("%s %s", id, nodeClass);
 				System.out.println(line);
-				context.write(new ImmutableBytesWritable(Bytes.toBytes(dataset)), new Text(line));
+				context.write(new ImmutableBytesWritable(Bytes.toBytes(dataset.replace(".", ""))), new Text(line));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -92,11 +92,13 @@ public class FileWriter {
 
 		@Override
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values, Context context) {
-			MultipleOutputs<Text, Text> mos = new MultipleOutputs<Text, Text>(
-					context);
+			MultipleOutputs mos = new MultipleOutputs(context);
+			//System.out.println(new String(key.get()));
 			for (Text value : values) {
 				try {
-					mos.write(new Text("v"), value , new String(key.copyBytes()));
+					//mos.write(new Text("v"), value , new String(key.copyBytes()));
+					//System.out.println(key.toString());
+					mos.write(new String(key.get()), "v", value);
 					//context.write(key, value);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -148,7 +150,7 @@ public class FileWriter {
 
 				fileJob.setOutputFormatClass(NullOutputFormat.class);
 				
-				FileOutputFormat.setOutputPath(fileJob, new Path(output + "/" + dataset));
+				FileOutputFormat.setOutputPath(fileJob, new Path(output + "/" + dataset.replace(".", "")));
 				MultipleOutputs.addNamedOutput(fileJob, dataset.replace(".", ""),
 						TextOutputFormat.class, Text.class, Text.class);
 
