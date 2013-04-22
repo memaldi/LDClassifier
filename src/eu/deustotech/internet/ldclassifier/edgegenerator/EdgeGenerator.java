@@ -14,10 +14,29 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class EdgeGenerator {
+	
+	public static class EdgeGeneratorReducer extends Reducer<Text, Text, Text, Text> {
+		
+		@Override
+		public void reduce(Text key, Iterable<Text> values, Context context) {
+			
+			try {
+				System.out.println(key.toString());
+				context.write(key, new Text(""));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public static class EdgeGeneratorMapper extends
 			Mapper<Text, Text, Text, Text> {
@@ -55,11 +74,14 @@ public class EdgeGenerator {
 					String object = new String(objects.get(objectKey));
 					String property = new String(properties.get(objectKey));
 
+					System.out.println(object);
+					
 					if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
 							.equals(property)) {
 						Put p = new Put(Bytes.toBytes(subject));
 						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("class"),
-								Bytes.toBytes("property"));
+								Bytes.toBytes(object));
+						sTable.put(p);
 					} else {
 						
 						Get oGet = new Get(Bytes.toBytes(object));
@@ -80,16 +102,21 @@ public class EdgeGenerator {
 							//context.write(new Text(), new Text());
 						}
 					}
-
 				}
+				
+				context.write(key, key);
+				
 			} catch (IOException e) { // TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 		}
 	}
 
-	public static void run(String input) {
+	public static void run(String input, String output) {
 
 		try {
 			Configuration edgeConfig = new Configuration();
@@ -103,10 +130,17 @@ public class EdgeGenerator {
 			edgeJob.setJobName("[LDClassifier]EdgeJob");
 			KeyValueTextInputFormat.addInputPath(edgeJob, new Path(input));
 			edgeJob.setInputFormatClass(KeyValueTextInputFormat.class);
-			// FileOutputFormat.setOutputPath(edgedJob, new Path(output));
-			edgeJob.setOutputFormatClass(NullOutputFormat.class);
+			FileOutputFormat.setOutputPath(edgeJob, new Path(output));
+			//edgeJob.setOutputFormatClass(NullOutputFormat.class);
 
+			edgeJob.setMapOutputKeyClass(Text.class);
+			edgeJob.setMapOutputValueClass(Text.class);
+			edgeJob.setOutputKeyClass(Text.class);
+			edgeJob.setOutputValueClass(Text.class);
+			
 			edgeJob.setMapperClass(EdgeGeneratorMapper.class);
+			edgeJob.setReducerClass(EdgeGeneratorReducer.class);
+			edgeJob.setNumReduceTasks(1);
 			edgeJob.waitForCompletion(true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
