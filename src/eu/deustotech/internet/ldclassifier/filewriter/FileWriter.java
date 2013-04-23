@@ -5,9 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -94,7 +98,31 @@ public class FileWriter {
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values, Context context) {
 			MultipleOutputs mos = new MultipleOutputs(context);
 			//System.out.println(new String(key.get()));
+			
+			SortedMap<Long, String> vertexMap = new  ConcurrentSkipListMap<Long, String>();
+			
 			for (Text value : values) {
+				String line = value.toString();
+				
+				long index = Long.valueOf(line.split(" ")[0]);
+				String node = line.split(" ")[1];
+				
+				vertexMap.put(index, node);
+			}
+			
+			for (Long index : vertexMap.keySet()) {
+				try {
+					mos.write(new String(key.get()).replace(".", " "), "v", new Text(String.format("%s \"%s\"", index.toString(), vertexMap.get(index))));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			/*for (Text value : values) {
 				try {
 					//mos.write(new Text("v"), value , new String(key.copyBytes()));
 					//System.out.println(key.toString());
@@ -107,7 +135,7 @@ public class FileWriter {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			}*/
 		}
 	}
 
