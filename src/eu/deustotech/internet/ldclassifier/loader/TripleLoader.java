@@ -53,7 +53,7 @@ public class TripleLoader {
 					Put p = new Put(Bytes.toBytes(String.valueOf(subject)));
 					long count = context.getCounter(counter.COUNTER).getValue();
 					context.getCounter(counter.COUNTER).increment(1);
-
+					
 					p.add(Bytes.toBytes("p"),
 							Bytes.toBytes(String.valueOf(count)),
 							Bytes.toBytes(predicate));
@@ -67,6 +67,7 @@ public class TripleLoader {
 					context.write(new Text(graph), new Text(subject));
 				}
 
+				context.progress();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
