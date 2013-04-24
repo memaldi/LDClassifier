@@ -30,7 +30,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 public class TripleLoader {
 
 	static enum counter {
-		COUNTER
+		COUNTER, PROGRESS
 	}
 
 	public static class TripleLoaderMapper extends
@@ -66,7 +66,7 @@ public class TripleLoader {
 
 					context.write(new Text(graph), new Text(subject));
 				}
-
+				context.getCounter(counter.PROGRESS).increment(1);
 				context.progress();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
