@@ -26,7 +26,7 @@ public class EdgeGenerator {
 		public void reduce(Text key, Iterable<Text> values, Context context) {
 			
 			try {
-				System.out.println(key.toString());
+				//System.out.println(key.toString());
 				context.write(key, new Text(""));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -74,7 +74,7 @@ public class EdgeGenerator {
 					String object = new String(objects.get(objectKey));
 					String property = new String(properties.get(objectKey));
 
-					System.out.println(object);
+					//System.out.println(object);
 					
 					if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
 							.equals(property)) {

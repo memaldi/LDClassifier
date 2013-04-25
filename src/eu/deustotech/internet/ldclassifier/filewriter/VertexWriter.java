@@ -51,7 +51,7 @@ public class VertexWriter {
 				HTable table = new HTable(context.getConfiguration(), dataset);
 				Get get = new Get(row);
 				Result result = table.get(get);
-				System.out.println(result);
+				//System.out.println(result);
 				String nodeClass = new String(result.getValue(
 						Bytes.toBytes("subdue"), Bytes.toBytes("class")));
 				result = table.get(get);
@@ -59,7 +59,7 @@ public class VertexWriter {
 						Bytes.toBytes("id")));
 				// System.out.println(nodeClass);
 				String line = String.format("%s %s", id, nodeClass);
-				System.out.println(line);
+				//System.out.println(line);
 				context.write(
 						new ImmutableBytesWritable(Bytes.toBytes(dataset
 								.replace(".", ""))), new Text(line));

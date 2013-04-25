@@ -26,19 +26,14 @@
 			<locationURI>PARENT-4-PROJECT_LOC/lib/hadoop/hadoop-1.0.4/hadoop-core-1.0.4.jar</locationURI>
 		</link>
 		<link>
-			<name>lib/hbase-0.94.5.jar</name>
+			<name>lib/hbase-0.94.6.1.jar</name>
 			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/lib/hbase/hbase-0.94.5/hbase-0.94.5.jar</locationURI>
+			<locationURI>PARENT-4-PROJECT_LOC/lib/hbase/hbase-0.94.6.1/hbase-0.94.6.1.jar</locationURI>
 		</link>
 		<link>
 			<name>lib/openrdf-sesame-2.6.9.jar</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/stardog/stardog-1.1.5/lib/org.openrdf.sesame/sesame/2.6.9/openrdf-sesame-2.6.9.jar</locationURI>
-		</link>
-		<link>
-			<name>lib/stardog-1.1.5.jar</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/stardog/stardog-1.1.5/lib/stardog-1.1.5.jar</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

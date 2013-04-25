@@ -30,7 +30,7 @@ public class EdgeWriter {
 				HTable table = new HTable(context.getConfiguration(), dataset);
 				Get get = new Get(row);
 				Result result = table.get(get);
-				System.out.println(result);
+				//System.out.println(result);
 				String source = new String(result.getValue(
 						Bytes.toBytes("subdue"), Bytes.toBytes("source")));
 				result = table.get(get);
@@ -41,7 +41,7 @@ public class EdgeWriter {
 						Bytes.toBytes("subdue"), Bytes.toBytes("edge")));
 				
 				String line = String.format("%s %s %s", source, target, edge);
-				System.out.println(line);
+				//System.out.println(line);
 				context.write(
 						new ImmutableBytesWritable(Bytes.toBytes(dataset
 								.replace(".", ""))), new Text(line));

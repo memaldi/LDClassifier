@@ -9,3 +9,5 @@ lib
 
 input/*
 output/*
+utils/*
+hbase-site.xml
