@@ -1,10 +1,6 @@
 package eu.deustotech.internet.ldclassifier.loader;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -12,11 +8,9 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -50,6 +44,7 @@ public class TripleLoader {
 					Configuration config = HBaseConfiguration.create();
 
 					HTable table = new HTable(config, "datasets");
+					
 					Put p = new Put(Bytes.toBytes(String.valueOf(subject)));
 					long count = context.getCounter(counter.COUNTER).getValue();
 					context.getCounter(counter.COUNTER).increment(1);
@@ -63,7 +58,15 @@ public class TripleLoader {
 					p.add(Bytes.toBytes("g"), Bytes.toBytes(""),
 							Bytes.toBytes(graph));
 					table.put(p);
-
+							
+					if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>".equals(predicate)) {
+						HTable dTable = TripleLoaderReducer.getTable(new Text(graph));
+						Put dP = new Put(Bytes.toBytes(String.valueOf(subject)));
+						dP.add(Bytes.toBytes("subdue"), Bytes.toBytes("class"), Bytes.toBytes(object));
+						dP.add(Bytes.toBytes("subdue"), Bytes.toBytes("type"), Bytes.toBytes("v"));
+						dTable.put(dP);
+					}
+					
 					context.write(new Text(graph), new Text(subject));
 				}
 				context.getCounter(counter.PROGRESS).increment(1);
@@ -85,7 +88,17 @@ public class TripleLoader {
 		@Override
 		public void reduce(Text key, Iterable<Text> values, Context context) {
 
-			Set<String> subjects = new HashSet<String>();
+			try {
+				context.write(key, new Text(""));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			/*Set<String> subjects = new HashSet<String>();
 			int i = 1;
 			HTable dTable = null;
 			try {
@@ -107,13 +120,16 @@ public class TripleLoader {
 						Result result = dTable.get(get);
 						Map<byte[], byte[]> familyMap = result
 								.getFamilyMap(Bytes.toBytes("p"));
+						Map<byte[], byte[]> objectMap = result.getFamilyMap(Bytes.toBytes("o"));
 						
+						String nodeClass = "";
 						boolean type = false;
 						for (byte[] fKey : familyMap.keySet()) {
 							System.out.println(String.format("%s - %s", new String(fKey), new String(familyMap.get(fKey))));
-							String typeStr = new String(familyMap.get(fKey));
-							if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>".equals(typeStr)) {
+							String typeStrTmp = new String(familyMap.get(fKey));
+							if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>".equals(typeStrTmp)) {
 								type = true;
+								nodeClass = new String(objectMap.get(fKey));
 							}
 						}
 						
@@ -129,6 +145,8 @@ public class TripleLoader {
 									Bytes.toBytes(String.valueOf(i)));
 							p.add(Bytes.toBytes("subdue"),
 									Bytes.toBytes("type"), Bytes.toBytes("v"));
+							p.add(Bytes.toBytes("subdue"), Bytes.toBytes("class"),
+									Bytes.toBytes(nodeClass));
 							table.put(p);
 
 							subjects.add(value.toString());
@@ -142,11 +160,11 @@ public class TripleLoader {
 						e.printStackTrace();
 					}
 				}
-			}
+			}*/
 
 		}
 
-		private HTable getTable(Text key) throws IOException {
+		public static HTable getTable(Text key) throws IOException {
 			Configuration config = HBaseConfiguration.create();
 			HTable table = null;
 			HBaseAdmin hbase = null;
@@ -177,7 +195,7 @@ public class TripleLoader {
 	public static void run(String input, String output) {
 
 		Configuration loadConfig = new Configuration();
-		loadConfig.set("mapred.textoutputformat.separator", ",");
+		//loadConfig.set("mapred.textoutputformat.separator", ",");
 		try {
 
 			preLoad();

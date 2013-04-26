@@ -48,22 +48,25 @@ public class LaunchUtils {
 
 		Scan scan = new Scan();
 
-		List<Filter> filters = new ArrayList<Filter>();
-
-		Filter typeFilter = new ValueFilter(CompareFilter.CompareOp.EQUAL,
-				new BinaryComparator(Bytes.toBytes(filter)));
-		filters.add(typeFilter);
-
-		FilterList fl = new FilterList(FilterList.Operator.MUST_PASS_ALL,
-				filters);
-
-		scan.setFilter(fl);
+		if (filter != null) {
+			List<Filter> filters = new ArrayList<Filter>();
+	
+			Filter typeFilter = new ValueFilter(CompareFilter.CompareOp.EQUAL,
+					new BinaryComparator(Bytes.toBytes(filter)));
+			filters.add(typeFilter);
+	
+			FilterList fl = new FilterList(FilterList.Operator.MUST_PASS_ALL,
+					filters);
+	
+			scan.setFilter(fl);
+		}
 
 		TableMapReduceUtil.initTableMapperJob(dataset, scan,
 				(Class<? extends TableMapper>) mapper, ImmutableBytesWritable.class,
 				Result.class, fileJob);
-
-		fileJob.setOutputFormatClass(NullOutputFormat.class);
+		if (output == null) {
+			fileJob.setOutputFormatClass(NullOutputFormat.class);
+		}
 
 		FileOutputFormat.setOutputPath(fileJob,
 				new Path(output + "/" + dataset.replace(".", "")));
@@ -76,7 +79,9 @@ public class LaunchUtils {
 		fileJob.setOutputValueClass(Text.class);
 
 		fileJob.setMapperClass(mapper);
-		fileJob.setReducerClass(reducer);
+		if (reducer != null) {
+			fileJob.setReducerClass(reducer);
+		}
 
 		return fileJob;
 

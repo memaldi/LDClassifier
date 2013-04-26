@@ -4,6 +4,7 @@ import eu.deustotech.internet.ldclassifier.edgegenerator.EdgeGenerator;
 import eu.deustotech.internet.ldclassifier.filewriter.EdgeWriter;
 import eu.deustotech.internet.ldclassifier.filewriter.VertexWriter;
 import eu.deustotech.internet.ldclassifier.loader.TripleLoader;
+import eu.deustotech.internet.ldclassifier.vertexgenerator.VertexGenerator;
 
 public class LDClassifier {
 
@@ -16,8 +17,10 @@ public class LDClassifier {
 			System.exit(1);
 		} else if ("load".equals(args[0])) {
 			TripleLoader.run(args[1], args[2]);
+		} else if ("generateVertex".equals(args[0])) {
+			VertexGenerator.run(args[1]);
 		} else if ("generateEdges".equals(args[0])) {
-			EdgeGenerator.run(args[1], args[2]);
+			EdgeGenerator.run(args[1]);
 		} else if ("writeVertex".equals(args[0])) {
 			VertexWriter.run(args[1], args[2]);
 		} else if ("writeEdges".equals(args[0])) {
