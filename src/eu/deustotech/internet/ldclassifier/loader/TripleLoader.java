@@ -65,9 +65,11 @@ public class TripleLoader {
 						dP.add(Bytes.toBytes("subdue"), Bytes.toBytes("class"), Bytes.toBytes(object));
 						dP.add(Bytes.toBytes("subdue"), Bytes.toBytes("type"), Bytes.toBytes("v"));
 						dTable.put(dP);
+						dTable.close();
 					}
 					
 					context.write(new Text(graph), new Text(subject));
+					table.close();
 				}
 				context.getCounter(counter.PROGRESS).increment(1);
 				context.progress();
