@@ -159,9 +159,12 @@ public class EdgeGenerator {
 								Bytes.toBytes("e"));
 						
 						datasetTable.put(p);
+						
 					}
 					
 				}
+				datasetTable.close();
+				table.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

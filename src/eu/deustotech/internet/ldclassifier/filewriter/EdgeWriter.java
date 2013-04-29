@@ -45,6 +45,7 @@ public class EdgeWriter {
 				context.write(
 						new ImmutableBytesWritable(Bytes.toBytes(dataset
 								.replace(".", ""))), new Text(line));
+				table.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
