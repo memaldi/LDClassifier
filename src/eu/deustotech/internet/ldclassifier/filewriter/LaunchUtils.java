@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class LaunchUtils {
-	public static Job launch(String input, String output, String jobName,
+	public static Job launch(String output, String jobName,
 			String filter, String dataset, Configuration fileConfig,
 			Class<? extends Mapper> mapper, Class<? extends Reducer> reducer)
 			throws IOException {

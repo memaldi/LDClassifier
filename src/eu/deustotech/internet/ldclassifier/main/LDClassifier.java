@@ -10,7 +10,7 @@ public class LDClassifier {
 
 	static public void main(String[] args) {
 
-		if (args.length != 3) {
+		if (args.length < 2) {
 			System.out.println("Invalid arg number!");
 			System.out
 					.println("Usage: LDClassifier [load | generateEdges | writeVertex | writeEdges] <inputDir> <outputDir> ");

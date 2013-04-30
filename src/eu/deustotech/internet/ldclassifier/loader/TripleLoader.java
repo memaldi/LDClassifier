@@ -19,6 +19,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class TripleLoader {
@@ -99,70 +100,6 @@ public class TripleLoader {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			/*Set<String> subjects = new HashSet<String>();
-			int i = 1;
-			HTable dTable = null;
-			try {
-				dTable = getTable(new Text("datasets"));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
-			Get get = null;
-
-			for (Text value : values) {
-				if (!subjects.contains(value.toString())) {
-					try {
-
-						get = new Get(Bytes.toBytes(value.toString()));
-						//get.addFamily(Bytes.toBytes("p"));
-
-						Result result = dTable.get(get);
-						Map<byte[], byte[]> familyMap = result
-								.getFamilyMap(Bytes.toBytes("p"));
-						Map<byte[], byte[]> objectMap = result.getFamilyMap(Bytes.toBytes("o"));
-						
-						String nodeClass = "";
-						boolean type = false;
-						for (byte[] fKey : familyMap.keySet()) {
-							System.out.println(String.format("%s - %s", new String(fKey), new String(familyMap.get(fKey))));
-							String typeStrTmp = new String(familyMap.get(fKey));
-							if ("<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>".equals(typeStrTmp)) {
-								type = true;
-								nodeClass = new String(objectMap.get(fKey));
-							}
-						}
-						
-						if (type) {
-
-							System.out.println(String.format("%s - %s - %s",
-									key, value, i));
-							context.write(key, value);
-
-							HTable table = getTable(key);
-							Put p = new Put(Bytes.toBytes(value.toString()));
-							p.add(Bytes.toBytes("subdue"), Bytes.toBytes("id"),
-									Bytes.toBytes(String.valueOf(i)));
-							p.add(Bytes.toBytes("subdue"),
-									Bytes.toBytes("type"), Bytes.toBytes("v"));
-							p.add(Bytes.toBytes("subdue"), Bytes.toBytes("class"),
-									Bytes.toBytes(nodeClass));
-							table.put(p);
-
-							subjects.add(value.toString());
-							i++;
-						}
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}*/
 
 		}
 
@@ -194,7 +131,7 @@ public class TripleLoader {
 		}
 	}
 
-	public static void run(String input, String output) {
+	public static void run(String input, String dataset) {
 
 		Configuration loadConfig = new Configuration();
 		//loadConfig.set("mapred.textoutputformat.separator", ",");
@@ -204,17 +141,18 @@ public class TripleLoader {
 
 			Job loadJob = new Job(loadConfig);
 			loadJob.setJarByClass(TripleLoader.class);
-			loadJob.setJobName("[LDClassifier]LoadJob");
+			loadJob.setJobName("[LDClassifier]LoadJob-" + dataset);
 			FileInputFormat.addInputPath(loadJob, new Path(input));
-			TextOutputFormat.setOutputPath(loadJob, new Path(output));
-
+			//TextOutputFormat.setOutputPath(loadJob, new Path(output));
+			loadJob.setOutputFormatClass(NullOutputFormat.class);
+			
 			loadJob.setMapOutputKeyClass(Text.class);
 			loadJob.setMapOutputValueClass(Text.class);
-			loadJob.setOutputKeyClass(Text.class);
-			loadJob.setOutputValueClass(Text.class);
+			//loadJob.setOutputKeyClass(Text.class);
+			//loadJob.setOutputValueClass(Text.class);
 
 			loadJob.setMapperClass(TripleLoaderMapper.class);
-			loadJob.setReducerClass(TripleLoaderReducer.class);
+			//loadJob.setReducerClass(TripleLoaderReducer.class);
 
 			loadJob.waitForCompletion(true);
 

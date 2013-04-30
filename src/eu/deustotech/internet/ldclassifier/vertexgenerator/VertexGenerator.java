@@ -45,18 +45,18 @@ public class VertexGenerator {
 		
 	}
 		
-	public static void run(String input) {
+	public static void run(String dataset) {
 		Configuration fileConfig = new Configuration();
 
 		FileSystem fs;
 		try {
 			fs = FileSystem.get(fileConfig);
-			Set<String> datasets = LaunchUtils.getDatasets(input + "/part-r-00000", fs);
-			for (String dataset : datasets) {
-				Job vertexJob = LaunchUtils.launch(input, null, "VertexGenerator", null,
+			//Set<String> datasets = LaunchUtils.getDatasets(input + "/part-r-00000", fs);
+			//for (String dataset : datasets) {
+				Job vertexJob = LaunchUtils.launch(null, "VertexGenerator", null,
 						dataset, fileConfig, VertexGeneratorMapper.class, null);
 				vertexJob.submit();
-			}
+			//}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

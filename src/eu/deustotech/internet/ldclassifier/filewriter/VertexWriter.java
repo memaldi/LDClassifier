@@ -97,18 +97,18 @@ public class VertexWriter {
 		}
 	}
 
-	public static void run(String input, String output) {
+	public static void run(String output, String dataset) {
 		Configuration fileConfig = new Configuration();
 
 		FileSystem fs;
 		try {
 			fs = FileSystem.get(fileConfig);
-			Set<String> datasets = LaunchUtils.getDatasets(input + "/part-r-00000", fs);
-			for (String dataset : datasets) {
-				Job vertexJob = LaunchUtils.launch(input, output, "VertexWriter", "v",
+			//Set<String> datasets = LaunchUtils.getDatasets(input + "/part-r-00000", fs);
+			//for (String dataset : datasets) {
+				Job vertexJob = LaunchUtils.launch(output, "VertexWriter", "v",
 						dataset, fileConfig, VertexWriterMapper.class, VertexWriterReducer.class);
 				vertexJob.submit();
-			}
+			//}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
