@@ -107,7 +107,7 @@ public class VertexWriter {
 			//for (String dataset : datasets) {
 				Job vertexJob = LaunchUtils.launch(output, "VertexWriter", "v",
 						dataset, fileConfig, VertexWriterMapper.class, VertexWriterReducer.class);
-				vertexJob.submit();
+				vertexJob.waitForCompletion(true);
 			//}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -111,7 +111,7 @@ public class EdgeGenerator {
 			//for (String dataset : datasets) {
 				Job vertexJob = LaunchUtils.launch(null, "EdgeGenerator", null,
 						dataset, edgeConfig, EdgeGeneratorMapper.class, null);
-				vertexJob.submit();
+				vertexJob.waitForCompletion(true);
 			//}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -89,7 +89,7 @@ public class EdgeWriter {
 			//for (String dataset : datasets) {
 				Job edgeJob = LaunchUtils.launch(output, "EdgeWriter", "e",
 						dataset, fileConfig, EdgeWriterMapper.class, EdgeWriteReducer.class);
-				edgeJob.submit();
+				edgeJob.waitForCompletion(true);
 			//}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

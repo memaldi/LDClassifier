@@ -55,7 +55,7 @@ public class VertexGenerator {
 			//for (String dataset : datasets) {
 				Job vertexJob = LaunchUtils.launch(null, "VertexGenerator", null,
 						dataset, fileConfig, VertexGeneratorMapper.class, null);
-				vertexJob.submit();
+				vertexJob.waitForCompletion(true);
 			//}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
