@@ -92,10 +92,11 @@ public class MultiGraph {
 				for (String edge : edgeList) {
 					subgraph += edge;
 				}
-				System.out.println(subgraph);
+				//System.out.println(subgraph);
 				context.write(new ImmutableBytesWritable(Bytes.toBytes(context
 						.getConfiguration().get("dataset"))), new Text(subgraph));
-
+				table.close();
+				dTable.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -111,10 +112,10 @@ public class MultiGraph {
 		
 		@Override
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values, Context context){
-			System.out.println("Reduceee!");
+			//System.out.println("Reduceee!");
 			for (Text value : values) {
 				try {
-					System.out.println(value.toString());
+					//System.out.println(value.toString());
 					context.write(null, value);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
