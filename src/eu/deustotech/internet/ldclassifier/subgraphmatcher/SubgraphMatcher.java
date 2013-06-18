@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import org.semanticweb.owl.align.AlignmentException;
 import org.semanticweb.owl.align.AlignmentProcess;
@@ -31,6 +32,8 @@ public class SubgraphMatcher {
 
 	private static List<URI> ontoList = new ArrayList<URI>();
 	private static List<String> alignClassList = new ArrayList<String>();
+	private static int alignmentCount = 3;
+	private static float threshold = (float) 0.5;
 
 	static {
 		alignClassList
@@ -110,7 +113,8 @@ public class SubgraphMatcher {
 
 		// System.out.println(alignmentList);
 		Set<MatchedPair> matchedSet = new HashSet<MatchedPair>();
-
+		CommonGraphList commonGraphList = new CommonGraphList();
+		
 		for (Graph graph_i : graphList) {
 			for (Graph graph_j : graphList) {
 				if (graph_i != graph_j) {
@@ -128,6 +132,36 @@ public class SubgraphMatcher {
 								if ((mp = pairList.searchPair(new URI(vertex_i.getLabel()), new URI(vertex_j.getLabel()))) != null) {
 									//System.out.println(String.format("%s - %s - %s", mp.getSource(), mp.getTarget(), mp.getAlignmentMap()));
 									matchedSet.add(mp);
+									float mean = 0;
+									for (String alignmentClass : mp.getAlignmentMap().keySet()) {
+										mean += mp.getAlignmentMap().get(alignmentClass);
+									}
+									mean = mean / alignmentCount;
+									if (mean > threshold) {
+										CommonGraph cg;
+										Graph commonGraph_i;
+										Graph commonGraph_j;
+										if ((cg = commonGraphList.searchCommonGraph(graph_i, graph_j)) == null) {
+											cg = new CommonGraph(graph_i, graph_j);
+											commonGraphList.add(cg);
+											commonGraph_i = new Graph(graph_i);
+											commonGraph_j = new Graph(graph_j);
+										} else {
+											commonGraph_i = cg.getSourceCommon();
+											commonGraph_j = cg.getTargetCommon();
+										}
+										int index = commonGraphList.indexOf(cg);
+										
+										UUID uuid = UUID.randomUUID();
+										
+										commonGraph_i.replace(mp.getSource().toString(), uuid.toString());
+										commonGraph_j.replace(mp.getTarget().toString(), uuid.toString());
+										cg.setSourceCommon(commonGraph_i);
+										cg.setTargetCommon(commonGraph_j);
+	
+										commonGraphList.set(index, cg);
+									}
+																		
 								}
 							} catch (URISyntaxException e) {
 								// TODO Auto-generated catch block
@@ -145,7 +179,49 @@ public class SubgraphMatcher {
 			System.out.println(String.format("%s - %s - %s", mp.getSource(),
 					mp.getTarget(), mp.getAlignmentMap()));
 		}
+		
+		for (CommonGraph cg : commonGraphList) {
+			System.out.println("Matched graphs!");
+			printCommonGraphs(cg);
+		}
+	}
 
+	private static void printCommonGraphs(CommonGraph cg) {
+		Graph source = cg.getSource();
+		System.out.println("Source");
+		for (Vertex vertex : source.getVertexList()) {
+			System.out.println(String.format("%s", vertex.getLabel()));
+		}
+		for (Edge edge : source.getEdgeList()) {
+			System.out.println(String.format("%s %s %s", edge.getSource(), edge.getTarget(), edge.getLabel()));
+		}
+		
+		Graph target = cg.getTarget();
+		System.out.println("Target");
+		for (Vertex vertex : target.getVertexList()) {
+			System.out.println(String.format("%s", vertex.getLabel()));
+		}
+		for (Edge edge : target.getEdgeList()) {
+			System.out.println(String.format("%s %s %s", edge.getSource(), edge.getTarget(), edge.getLabel()));
+		}
+		
+		Graph sourceCommon = cg.getSourceCommon();
+		System.out.println("Source Common");
+		for (Vertex vertex : sourceCommon.getVertexList()) {
+			System.out.println(String.format("%s", vertex.getLabel()));
+		}
+		for (Edge edge : sourceCommon.getEdgeList()) {
+			System.out.println(String.format("%s %s %s", edge.getSource(), edge.getTarget(), edge.getLabel()));
+		}
+		
+		Graph targetCommon = cg.getTargetCommon();
+		System.out.println("Target Common");
+		for (Vertex vertex : targetCommon.getVertexList()) {
+			System.out.println(String.format("%s", vertex.getLabel()));
+		}
+		for (Edge edge : targetCommon.getEdgeList()) {
+			System.out.println(String.format("%s %s %s", edge.getSource(), edge.getTarget(), edge.getLabel()));
+		}
 	}
 
 	private static List<Graph> getGraphs(String graphDir) {
@@ -168,7 +244,7 @@ public class SubgraphMatcher {
 						String[] strArray = strLine.split(" ");
 						if (strArray[0].equals("v")) {
 							Vertex vertex = new Vertex(
-									Long.getLong(strArray[1]), strArray[2]);
+									Long.parseLong(strArray[1]), strArray[2]);
 							URI ontoURI = new URI(getPrefix(vertex.getLabel()));
 							if (!ontoList.contains(ontoURI)) {
 								ontoList.add(ontoURI);
@@ -176,8 +252,8 @@ public class SubgraphMatcher {
 							graph.addVertex(vertex);
 						} else if (strArray[0].equals("d")
 								|| strArray[0].equals("e")) {
-							Edge edge = new Edge(Long.getLong(strArray[1]),
-									Long.getLong(strArray[2]), strArray[3]);
+							Edge edge = new Edge(Long.parseLong(strArray[1]),
+									Long.parseLong(strArray[2]), strArray[3]);
 							graph.addEdge(edge);
 						}
 					}

@@ -16,6 +16,49 @@ public class Graph {
 		this.edgeList = new ArrayList<Edge>();
 	}
 	
+	public Graph(Graph graph) {
+		this.id = UUID.randomUUID();
+		this.vertexList = new ArrayList<Vertex>();
+		this.vertexList.addAll(graph.getVertexList());
+		this.edgeList = new ArrayList<Edge>();
+		this.edgeList.addAll(graph.getEdgeList());
+	}
+	
+	
+	
+	public void setVertexList(List<Vertex> vertexList) {
+		this.vertexList = vertexList;
+	}
+
+	public void replace(String source, String target) {
+		for (Vertex vertex : this.vertexList) {
+			if (vertex.getLabel().equals(source)) {
+				int index = this.vertexList.indexOf(vertex);
+				//vertex.setLabel(target);
+				this.vertexList.set(index, new Vertex(vertex.getId(), target));
+				//this.vertexList.set(index, new Vertex(new Long(1), "a"));
+			}
+		}
+		
+		for (Edge edge : this.edgeList) {
+			if (edge.getLabel().equals(source)) {
+				int index = this.edgeList.indexOf(edge);
+				edge.setLabel(target);
+				this.edgeList.set(index, edge);
+			}
+		}
+	}
+	
+	public boolean equals(Graph graph) {
+		if (graph == null)
+			return false;
+		if (this.id.compareTo(graph.getId()) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public void addVertex(Vertex vertex) {
 		this.vertexList.add(vertex);
 	}
