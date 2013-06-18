@@ -12,10 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +25,6 @@ import org.semanticweb.owl.align.Cell;
 import eu.deustotech.internet.ldclassifier.subgraphmatcher.Graph.Edge;
 import eu.deustotech.internet.ldclassifier.subgraphmatcher.Graph.Vertex;
 import fr.inrialpes.exmo.align.impl.BasicParameters;
-import fr.inrialpes.exmo.align.impl.method.NameAndPropertyAlignment;
 
 public class SubgraphMatcher {
 
@@ -45,6 +42,11 @@ public class SubgraphMatcher {
 				.add("fr.inrialpes.exmo.align.impl.method.StringDistAlignment");
 		//alignClassList
 		//		.add("fr.inrialpes.exmo.align.impl.method.StrucSubsDistAlignment");
+		alignClassList.add("fr.inrialpes.exmo.align.impl.method.EditDistNameAlignment");
+		alignClassList.add("fr.inrialpes.exmo.align.impl.method.NameEqAlignment");
+		alignClassList.add("fr.inrialpes.exmo.align.impl.method.SMOANameAlignment");
+		alignClassList.add("fr.inrialpes.exmo.align.impl.method.SubsDistNameAlignment");
+		alignClassList.add("fr.inrialpes.exmo.align.ling.JWNLAlignment");
 	}
 
 	public static void main(String[] args) {
@@ -66,6 +68,7 @@ public class SubgraphMatcher {
 					// NameAndPropertyAlignment();
 					for (String className : alignClassList) {
 						try {
+							System.out.println(String.format("Matching through %s", className));
 							AlignmentProcess aProcess = (AlignmentProcess) Class
 									.forName(className).newInstance();
 							Properties params = new BasicParameters();
