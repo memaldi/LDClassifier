@@ -9,6 +9,7 @@ public class Graph {
 	private UUID id;
 	private List<Vertex> vertexList;
 	private List<Edge> edgeList;
+	private String name;
 	
 	public Graph() {
 		this.id = UUID.randomUUID();
@@ -22,12 +23,15 @@ public class Graph {
 		this.vertexList.addAll(graph.getVertexList());
 		this.edgeList = new ArrayList<Edge>();
 		this.edgeList.addAll(graph.getEdgeList());
+		this.name = graph.getName();
 	}
-	
-	
-	
-	public void setVertexList(List<Vertex> vertexList) {
-		this.vertexList = vertexList;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void replace(String source, String target) {

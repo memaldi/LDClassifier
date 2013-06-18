@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -47,10 +48,10 @@ public class SubgraphMatcher {
 	}
 
 	public static void main(String[] args) {
-		run("/home/mikel/doctorado/subgraphs/subdue");
+		run("/home/mikel/doctorado/subgraphs/subdue", "/home/mikel/doctorado/subgraphs/matcher");
 	}
 
-	public static void run(String graphDir) {
+	public static void run(String graphDir, String resultDir) {
 
 		List<Graph> graphList = getGraphs(graphDir);
 		//AlignmentList alignmentList = new AlignmentList();
@@ -143,6 +144,7 @@ public class SubgraphMatcher {
 										Graph commonGraph_j;
 										if ((cg = commonGraphList.searchCommonGraph(graph_i, graph_j)) == null) {
 											cg = new CommonGraph(graph_i, graph_j);
+											
 											commonGraphList.add(cg);
 											commonGraph_i = new Graph(graph_i);
 											commonGraph_j = new Graph(graph_j);
@@ -183,12 +185,48 @@ public class SubgraphMatcher {
 		for (CommonGraph cg : commonGraphList) {
 			System.out.println("Matched graphs!");
 			printCommonGraphs(cg);
+			
+			String dir = String.format("%s/%s-%s", resultDir, cg.getSource().getName(), cg.getTarget().getName());
+			File fileDir = new File(dir);
+			fileDir.mkdir();
+			String sourceStr = "";
+			for (Vertex vertex : cg.getSourceCommon().getVertexList()) {
+				sourceStr += String.format("v %s %s\n", vertex.getId(), vertex.getLabel());
+			}
+			for (Edge edge : cg.getSourceCommon().getEdgeList()) {
+				sourceStr += String.format("e %s %s %s\n", edge.getSource(), edge.getTarget(), edge.getLabel());
+			}
+			try {
+				PrintWriter sourceFile = new PrintWriter(String.format("%s/%s", dir, cg.getSource().getName()));
+				sourceFile.print(sourceStr);
+				sourceFile.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			String targetStr = "";
+			for (Vertex vertex : cg.getTargetCommon().getVertexList()) {
+				targetStr += String.format("v %s %s\n", vertex.getId(), vertex.getLabel());
+			}
+			for (Edge edge : cg.getTargetCommon().getEdgeList()) {
+				targetStr += String.format("e %s %s %s\n", edge.getSource(), edge.getTarget(), edge.getLabel());
+			}
+			PrintWriter targetFile;
+			try {
+				targetFile = new PrintWriter(String.format("%s/%s", dir, cg.getTarget().getName()));
+				targetFile.print(targetStr);
+				targetFile.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private static void printCommonGraphs(CommonGraph cg) {
 		Graph source = cg.getSource();
-		System.out.println("Source");
+		System.out.println("Source: " + source.getName());
 		for (Vertex vertex : source.getVertexList()) {
 			System.out.println(String.format("%s", vertex.getLabel()));
 		}
@@ -197,7 +235,7 @@ public class SubgraphMatcher {
 		}
 		
 		Graph target = cg.getTarget();
-		System.out.println("Target");
+		System.out.println("Target: " + target.getName());
 		for (Vertex vertex : target.getVertexList()) {
 			System.out.println(String.format("%s", vertex.getLabel()));
 		}
@@ -239,7 +277,8 @@ public class SubgraphMatcher {
 					String strLine;
 
 					Graph graph = new Graph();
-
+					graph.setName(file.getName());
+					
 					while ((strLine = br.readLine()) != null) {
 						String[] strArray = strLine.split(" ");
 						if (strArray[0].equals("v")) {
