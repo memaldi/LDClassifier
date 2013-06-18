@@ -5,5 +5,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/hadoop-core-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/openrdf-sesame-2.6.9.jar"/>
 	<classpathentry kind="lib" path="lib/hbase-0.94.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/align.jar"/>
+	<classpathentry kind="lib" path="lib/procalign.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

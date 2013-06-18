@@ -33,10 +33,11 @@ public class TripleLoader {
 
 		@Override
 		public void map(LongWritable key, Text value, Context context) {
+			String[] triple = null;
 			try {
 				String graph = ((FileSplit) context.getInputSplit()).getPath()
 						.getName();
-				String[] triple = value.toString().split(" ");
+				triple = value.toString().split(" ");
 				String subject = triple[0];
 				String predicate = triple[1];
 				String object = "";
@@ -79,6 +80,9 @@ public class TripleLoader {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ArrayIndexOutOfBoundsException e){
+				System.out.println(triple);
 				e.printStackTrace();
 			}
 

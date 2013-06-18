@@ -21,6 +21,11 @@
 			<locationURI>PARENT-4-PROJECT_LOC/lib/hbase/hbase-0.94.5/conf/hbase-site.xml</locationURI>
 		</link>
 		<link>
+			<name>lib/align.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-4-PROJECT_LOC/ontology_matching/alignapi/lib/align.jar</locationURI>
+		</link>
+		<link>
 			<name>lib/hadoop-core-1.0.4.jar</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/lib/hadoop/hadoop-1.0.4/hadoop-core-1.0.4.jar</locationURI>
@@ -34,6 +39,11 @@
 			<name>lib/openrdf-sesame-2.6.9.jar</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/stardog/stardog-1.1.5/lib/org.openrdf.sesame/sesame/2.6.9/openrdf-sesame-2.6.9.jar</locationURI>
+		</link>
+		<link>
+			<name>lib/procalign.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-4-PROJECT_LOC/ontology_matching/alignapi/lib/procalign.jar</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

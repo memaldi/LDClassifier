@@ -4,6 +4,7 @@ import eu.deustotech.internet.ldclassifier.edgegenerator.EdgeGenerator;
 import eu.deustotech.internet.ldclassifier.filewriter.EdgeWriter;
 import eu.deustotech.internet.ldclassifier.filewriter.VertexWriter;
 import eu.deustotech.internet.ldclassifier.loader.TripleLoader;
+import eu.deustotech.internet.ldclassifier.metis.GraphFileGenerator;
 import eu.deustotech.internet.ldclassifier.vertexgenerator.VertexGenerator;
 
 public class LDClassifier {
@@ -25,6 +26,8 @@ public class LDClassifier {
 			VertexWriter.run(args[1], args[2]);
 		} else if ("writeEdges".equals(args[0])) {
 			EdgeWriter.run(args[1], args[2]);
+		} else if ("metis".equals(args[0])) {
+			GraphFileGenerator.run(args[1], args[2]);
 		}
 	}
 
