@@ -30,24 +30,32 @@ public class SubgraphMatcher {
 
 	private static List<URI> ontoList = new ArrayList<URI>();
 	private static List<String> alignClassList = new ArrayList<String>();
-	private static int alignmentCount = 3;
+	
+	private static List<String> stringMethodList = new ArrayList<String>();
+	
 	private static float threshold = (float) 0.5;
 
 	static {
 		alignClassList
 				.add("fr.inrialpes.exmo.align.impl.method.NameAndPropertyAlignment");
 		alignClassList
-				.add("fr.inrialpes.exmo.align.impl.method.ClassStructAlignment");
-		alignClassList
 				.add("fr.inrialpes.exmo.align.impl.method.StringDistAlignment");
-		//alignClassList
-		//		.add("fr.inrialpes.exmo.align.impl.method.StrucSubsDistAlignment");
-		alignClassList.add("fr.inrialpes.exmo.align.impl.method.EditDistNameAlignment");
-		alignClassList.add("fr.inrialpes.exmo.align.impl.method.NameEqAlignment");
-		alignClassList.add("fr.inrialpes.exmo.align.impl.method.SMOANameAlignment");
-		alignClassList.add("fr.inrialpes.exmo.align.impl.method.SubsDistNameAlignment");
-		alignClassList.add("fr.inrialpes.exmo.align.ling.JWNLAlignment");
+		//alignClassList.add("fr.inrialpes.exmo.align.ling.JWNLAlignment");
 	}
+	
+	static { 
+		stringMethodList.add("subStringDistance");
+		stringMethodList.add("equalDistance");
+		stringMethodList.add("hammingDistance");
+		stringMethodList.add("jaroMeasure");
+		stringMethodList.add("jaroWinklerMeasure");
+		stringMethodList.add("ngramDistance");
+		stringMethodList.add("levenshteinDistance");
+		stringMethodList.add("needlemanWunsch2Distance");
+		stringMethodList.add("smoaDistance");
+		stringMethodList.add("needlemanWunsch2Distance");
+	}
+	
 
 	public static void main(String[] args) {
 		run("/home/mikel/doctorado/subgraphs/subdue", "/home/mikel/doctorado/subgraphs/matcher");
@@ -55,6 +63,8 @@ public class SubgraphMatcher {
 
 	public static void run(String graphDir, String resultDir) {
 
+		int alignmentCount = alignClassList.size() + stringMethodList.size() - 1;
+		
 		List<Graph> graphList = getGraphs(graphDir);
 		//AlignmentList alignmentList = new AlignmentList();
 		//Map<Cell, List<Double>> cellMap = new HashMap<Cell, List<Double>>();
@@ -68,30 +78,59 @@ public class SubgraphMatcher {
 					// NameAndPropertyAlignment();
 					for (String className : alignClassList) {
 						try {
-							System.out.println(String.format("Matching through %s", className));
+							System.out.println(String.format("Matching %s and %s through %s", onto_i, onto_j, className));
 							AlignmentProcess aProcess = (AlignmentProcess) Class
 									.forName(className).newInstance();
-							Properties params = new BasicParameters();
-							aProcess.init(onto_i, onto_j);
-							aProcess.align(null, params);
-
-							Enumeration<Cell> cells = aProcess.getElements();
-
-							while (cells.hasMoreElements()) {
-								Cell cell = cells.nextElement();
-								// System.out.println(String.format("%s - %s - %s",
-								// cell.getObject1(), cell.getObject2(),
-								// cell.getStrength()));
-								//System.out.println(String.format("%s - %s - %s", cell.getObject1(),
-								//		cell.getObject2(), cell.getStrength()));
-								
-								MatchedPair mp;
-								
-								if ((mp = pairList.searchPair(new URI(cell.getObject1().toString().replace("<", "").replace(">", "")), new URI(cell.getObject2().toString().replace("<", "").replace(">", "")))) == null) {
-									mp = new MatchedPair(new URI(cell.getObject1().toString().replace("<", "").replace(">", "")), new URI(cell.getObject2().toString().replace("<", "").replace(">", "")));
+							Properties params = new Properties();
+							if (className.equals("fr.inrialpes.exmo.align.impl.method.StringDistAlignment")) {
+								for (String methodName : stringMethodList) {
+									aProcess.init(onto_i, onto_j);
+									params.setProperty("stringFunction", methodName);
+									aProcess.align(null, params);
+		
+									Enumeration<Cell> cells = aProcess.getElements();
+		
+									while (cells.hasMoreElements()) {
+										Cell cell = cells.nextElement();
+										// System.out.println(String.format("%s - %s - %s",
+										// cell.getObject1(), cell.getObject2(),
+										// cell.getStrength()));
+										//System.out.println(String.format("%s - %s - %s", cell.getObject1(),
+										//		cell.getObject2(), cell.getStrength()));
+										
+										MatchedPair mp;
+										
+										if ((mp = pairList.searchPair(new URI(cell.getObject1().toString().replace("<", "").replace(">", "")), new URI(cell.getObject2().toString().replace("<", "").replace(">", "")))) == null) {
+											mp = new MatchedPair(new URI(cell.getObject1().toString().replace("<", "").replace(">", "")), new URI(cell.getObject2().toString().replace("<", "").replace(">", "")));
+										}
+										//mp.addAlignment(className, cell.getStrength());
+										mp.addAlignment(methodName, cell.getStrength());
+										pairList.add(mp);
+									}	
 								}
-								mp.addAlignment(className, cell.getStrength());
-								pairList.add(mp);
+							} else {
+								aProcess.init(onto_i, onto_j);
+								aProcess.align(null, params);
+								
+								Enumeration<Cell> cells = aProcess.getElements();
+	
+								while (cells.hasMoreElements()) {
+									Cell cell = cells.nextElement();
+									// System.out.println(String.format("%s - %s - %s",
+									// cell.getObject1(), cell.getObject2(),
+									// cell.getStrength()));
+									//System.out.println(String.format("%s - %s - %s", cell.getObject1(),
+									//		cell.getObject2(), cell.getStrength()));
+									
+									MatchedPair mp;
+									
+									if ((mp = pairList.searchPair(new URI(cell.getObject1().toString().replace("<", "").replace(">", "")), new URI(cell.getObject2().toString().replace("<", "").replace(">", "")))) == null) {
+										mp = new MatchedPair(new URI(cell.getObject1().toString().replace("<", "").replace(">", "")), new URI(cell.getObject2().toString().replace("<", "").replace(">", "")));
+									}
+									//mp.addAlignment(className, cell.getStrength());
+									mp.addAlignment(className, cell.getStrength());
+									pairList.add(mp);
+								}	
 							}
 
 						} catch (AlignmentException e) {

@@ -1,7 +1,6 @@
 package eu.deustotech.internet.ldclassifier.filewriter;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -16,7 +15,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 public class VertexWriter {
 
@@ -65,14 +63,13 @@ public class VertexWriter {
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values,
 				Context context) {
 			
-			MultipleOutputs mos = new MultipleOutputs(context);
-			// System.out.println(new String(key.get()));
+			System.out.println(new String(key.get()));
 
 			SortedMap<Long, String> vertexMap = new ConcurrentSkipListMap<Long, String>();
 
 			for (Text value : values) {
 				String line = value.toString();
-
+				//System.out.println(line);
 				long index = Long.valueOf(line.split(" ")[0]);
 				String node = line.split(" ")[1];
 
@@ -80,11 +77,15 @@ public class VertexWriter {
 			}
 
 			for (Long index : vertexMap.keySet()) {
+				System.out.println(String.format("%s \"%s\"",
+									index.toString(), vertexMap.get(index)));
 				try {
-					mos.write(
+					/*mos.write(
 							new String(key.get()).replace(".", " "),
 							"v",
 							new Text(String.format("%s \"%s\"",
+									index.toString(), vertexMap.get(index))));*/
+					context.write(new Text("v"), new Text(String.format("%s \"%s\"",
 									index.toString(), vertexMap.get(index))));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

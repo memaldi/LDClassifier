@@ -51,6 +51,8 @@ public class TripleLoader {
 					long count = context.getCounter(counter.COUNTER).getValue();
 					context.getCounter(counter.COUNTER).increment(1);
 					
+					//System.out.println(String.format("%s %s %s", subject, predicate, object));
+					
 					p.add(Bytes.toBytes("p"),
 							Bytes.toBytes(String.valueOf(count)),
 							Bytes.toBytes(predicate));

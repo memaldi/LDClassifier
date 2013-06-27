@@ -1,8 +1,6 @@
 package eu.deustotech.internet.ldclassifier.filewriter;
 
 import java.io.IOException;
-import java.util.Set;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hbase.client.Get;
@@ -14,7 +12,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 public class EdgeWriter {
 	
@@ -62,11 +59,12 @@ public class EdgeWriter {
 		@Override
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values, Context context) {
 			
-			MultipleOutputs mos = new MultipleOutputs(context);
+			//MultipleOutputs mos = new MultipleOutputs(context);
 			
 			for (Text value : values) {
 				try {
-					mos.write(new String(key.get()), "e", value);
+					//mos.write(new String(key.get()), "e", value);
+					context.write(new Text("e"), value);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
