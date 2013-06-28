@@ -70,8 +70,8 @@ public class LaunchUtils {
 
 		FileOutputFormat.setOutputPath(fileJob,
 				new Path(output + "/" + dataset.replace(".", "")));
-		MultipleOutputs.addNamedOutput(fileJob, dataset.replace(".", ""),
-				TextOutputFormat.class, Text.class, Text.class);
+		//MultipleOutputs.addNamedOutput(fileJob, dataset.replace(".", ""),
+		//		TextOutputFormat.class, Text.class, Text.class);
 
 		fileJob.setMapOutputKeyClass(ImmutableBytesWritable.class);
 		fileJob.setMapOutputValueClass(Text.class);

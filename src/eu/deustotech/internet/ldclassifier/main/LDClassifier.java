@@ -5,13 +5,14 @@ import eu.deustotech.internet.ldclassifier.filewriter.EdgeWriter;
 import eu.deustotech.internet.ldclassifier.filewriter.VertexWriter;
 import eu.deustotech.internet.ldclassifier.loader.TripleLoader;
 import eu.deustotech.internet.ldclassifier.metis.GraphFileGenerator;
+import eu.deustotech.internet.ldclassifier.splitter.GraphSplitter;
 import eu.deustotech.internet.ldclassifier.vertexgenerator.VertexGenerator;
 
 public class LDClassifier {
 
 	static public void main(String[] args) {
 
-		if (args.length < 2) {
+		if (args.length < 3) {
 			System.out.println("Invalid arg number!");
 			System.out
 					.println("Usage: LDClassifier [load | generateEdges | writeVertex | writeEdges] <inputDir> <outputDir> ");
@@ -28,6 +29,8 @@ public class LDClassifier {
 			EdgeWriter.run(args[1], args[2]);
 		} else if ("metis".equals(args[0])) {
 			GraphFileGenerator.run(args[1], args[2]);
+		} else if ("splitGraph".equals(args[0])) {
+			GraphSplitter.run(args[1], args[2], args[3]);
 		}
 	}
 

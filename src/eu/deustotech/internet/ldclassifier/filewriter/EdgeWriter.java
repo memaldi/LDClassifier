@@ -64,6 +64,7 @@ public class EdgeWriter {
 			for (Text value : values) {
 				try {
 					//mos.write(new String(key.get()), "e", value);
+					//System.out.println(value.toString());
 					context.write(new Text("e"), value);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

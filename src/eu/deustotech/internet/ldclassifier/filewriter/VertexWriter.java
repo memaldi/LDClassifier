@@ -63,7 +63,7 @@ public class VertexWriter {
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values,
 				Context context) {
 			
-			System.out.println(new String(key.get()));
+			//System.out.println(new String(key.get()));
 
 			SortedMap<Long, String> vertexMap = new ConcurrentSkipListMap<Long, String>();
 
@@ -77,8 +77,8 @@ public class VertexWriter {
 			}
 
 			for (Long index : vertexMap.keySet()) {
-				System.out.println(String.format("%s \"%s\"",
-									index.toString(), vertexMap.get(index)));
+				//System.out.println(String.format("%s \"%s\"",
+				//					index.toString(), vertexMap.get(index)));
 				try {
 					/*mos.write(
 							new String(key.get()).replace(".", " "),
