@@ -31,10 +31,10 @@ public class GraphSplitter {
 		public void map(ImmutableBytesWritable key, Result value,
 				Context context) {
 
-			System.out.println(value.toString());
+			//System.out.println(value.toString());
 			
-			/*System.out.println(new String(value.getValue(
-					Bytes.toBytes("subdue"), Bytes.toBytes("id"))));*/
+			System.out.println(Bytes.toLong(value.getValue(
+					Bytes.toBytes("subdue"), Bytes.toBytes("id"))));
 		}
 	}
 
@@ -55,7 +55,7 @@ public class GraphSplitter {
 			 */
 			Filter keyFilter = new SingleColumnValueFilter(
 					Bytes.toBytes("subdue"), Bytes.toBytes("id"),
-					CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes(limit));
+					CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes(Long.parseLong(limit)));
 			/*
 			 * Filter vertexFilter = new ValueFilter(
 			 * CompareFilter.CompareOp.EQUAL, new BinaryComparator(

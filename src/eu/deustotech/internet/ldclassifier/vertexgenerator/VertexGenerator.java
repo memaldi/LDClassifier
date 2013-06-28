@@ -34,7 +34,7 @@ public class VertexGenerator {
 				long count = context.getCounter(counter.VERTEX_COUNTER)
 						.getValue() + 1;
 				context.getCounter(counter.VERTEX_COUNTER).increment(1);
-				p.add(Bytes.toBytes("subdue"), Bytes.toBytes("id"), Bytes.toBytes(String.valueOf(count)));
+				p.add(Bytes.toBytes("subdue"), Bytes.toBytes("id"), Bytes.toBytes(count));
 				table.put(p);
 				table.close();
 			} catch (IOException e) {
