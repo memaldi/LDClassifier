@@ -138,17 +138,17 @@ public class GraphSplitter {
 						String edge = new String(rr.getValue(
 								Bytes.toBytes("subdue"), Bytes.toBytes("edge")));
 					
-						System.out.println(rr);
-						System.out.println(String.format("%s - %s - %s", source, target, edge));
-
-						/*String edgeStr = String.format("e %s %s \"%s\"", source, target, edge);
-						edgeSet.add(edgeStr);*/
+						String edgeStr = String.format("%s %s \"%s\"", source, target, edge);
+						edgeSet.add(edgeStr);
 						
 					}
 					rs.close();
 					
 					context.write(new Text("v"), value);
-					
+	
+				}
+				for (String edge : edgeSet) {
+					context.write(new Text("e"), new Text(edge));
 				}
 				table.close();
 			} catch (IOException e) {
