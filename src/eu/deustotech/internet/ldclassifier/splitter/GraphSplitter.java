@@ -121,8 +121,8 @@ public class GraphSplitter {
 										
 					FilterList fl = new FilterList();
 					fl.addFilter(edgeFilter);
-					//fl.addFilter(idfl);
-					//fl.addFilter(constraintfl);
+					fl.addFilter(idfl);
+					fl.addFilter(constraintfl);
 					
 					scan.setFilter(fl);
 					
@@ -137,12 +137,10 @@ public class GraphSplitter {
 								Bytes.toBytes("subdue"), Bytes.toBytes("target")));
 						String edge = new String(rr.getValue(
 								Bytes.toBytes("subdue"), Bytes.toBytes("edge")));
-						if (source == id || target == id) {
-							System.out.println(rr);
-							System.out.println(String.format("%s - %s - %s", source, target, edge));
-						}
-						
-						
+					
+						System.out.println(rr);
+						System.out.println(String.format("%s - %s - %s", source, target, edge));
+
 						/*String edgeStr = String.format("e %s %s \"%s\"", source, target, edge);
 						edgeSet.add(edgeStr);*/
 						
