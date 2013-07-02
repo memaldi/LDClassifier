@@ -30,7 +30,7 @@ public class LDClassifier {
 		} else if ("metis".equals(args[0])) {
 			GraphFileGenerator.run(args[1], args[2]);
 		} else if ("splitGraph".equals(args[0])) {
-			GraphSplitter.run(args[1], args[2], args[3], args[4]);
+			GraphSplitter.run(args[1], args[2], args[3]);
 		}
 	}
 

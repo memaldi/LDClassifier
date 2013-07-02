@@ -49,8 +49,8 @@ public class GraphSplitter {
 			String keyName = String.format("[%s]%s-%s",
 					dataset.replace(".", ""), offset, limit);
 
-			//System.out.println(String.format("%s - %s", keyName, line));
-			
+			// System.out.println(String.format("%s - %s", keyName, line));
+
 			try {
 				context.write(
 						new ImmutableBytesWritable(Bytes.toBytes(keyName)),
@@ -70,82 +70,87 @@ public class GraphSplitter {
 
 		public void reduce(ImmutableBytesWritable key, Iterable<Text> values,
 				Context context) {
-			
+
 			Set<String> edgeSet = new HashSet<String>();
-			
+
 			String dataset = context.getConfiguration().get("dataset");
-			String limit = context.getConfiguration().get("limit");
+			long limit = context.getConfiguration().getLong("limit", 0);
+			System.out.println(String.format("Limit: %s", limit));
 			try {
 				HTable table = new HTable(context.getConfiguration(), dataset);
-				
+
 				for (Text value : values) {
 					long id = Long.parseLong(value.toString().split(" ")[0]);
 					System.out.println(id);
 					Scan scan = new Scan();
 					List<Filter> idFilterList = new ArrayList<Filter>();
 					List<Filter> filterList = new ArrayList<Filter>();
-					
+
 					Filter sourceIdFilter = new SingleColumnValueFilter(
 							Bytes.toBytes("subdue"), Bytes.toBytes("source"),
-							CompareFilter.CompareOp.EQUAL,
-							Bytes.toBytes(id));
-					
+							CompareFilter.CompareOp.EQUAL, Bytes.toBytes(id));
+
 					Filter targetIdFilter = new SingleColumnValueFilter(
 							Bytes.toBytes("subdue"), Bytes.toBytes("target"),
-							CompareFilter.CompareOp.EQUAL,
-							Bytes.toBytes(id));
-					
+							CompareFilter.CompareOp.EQUAL, Bytes.toBytes(id));
+
 					idFilterList.add(sourceIdFilter);
 					idFilterList.add(targetIdFilter);
-					
-					FilterList idfl = new FilterList(FilterList.Operator.MUST_PASS_ONE, idFilterList);					
-					
+
+					FilterList idfl = new FilterList(
+							FilterList.Operator.MUST_PASS_ONE, idFilterList);
+
 					Filter edgeFilter = new SingleColumnValueFilter(
 							Bytes.toBytes("subdue"), Bytes.toBytes("type"),
 							CompareFilter.CompareOp.EQUAL, Bytes.toBytes("e"));
-					
+
 					Filter sourceFilter = new SingleColumnValueFilter(
 							Bytes.toBytes("subdue"), Bytes.toBytes("source"),
 							CompareFilter.CompareOp.LESS_OR_EQUAL,
-							Bytes.toBytes(Long.parseLong(limit)));
-					
+							Bytes.toBytes(limit));
+
 					Filter targetFilter = new SingleColumnValueFilter(
 							Bytes.toBytes("subdue"), Bytes.toBytes("target"),
-							CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes(Long
-									.parseLong(limit)));
-	
+							CompareFilter.CompareOp.LESS_OR_EQUAL,
+							Bytes.toBytes(limit));
+
 					filterList.add(sourceFilter);
 					filterList.add(targetFilter);
-					
-					FilterList constraintfl = new FilterList(FilterList.Operator.MUST_PASS_ALL, filterList);
-										
+
+					FilterList constraintfl = new FilterList(
+							FilterList.Operator.MUST_PASS_ALL, filterList);
+
 					FilterList fl = new FilterList();
 					fl.addFilter(edgeFilter);
 					fl.addFilter(idfl);
 					fl.addFilter(constraintfl);
-					
+
 					scan.setFilter(fl);
-					
+
 					ResultScanner rs = table.getScanner(scan);
-					
+
 					Result rr;
-					while((rr = rs.next()) != null) {
-						
+					while ((rr = rs.next()) != null) {
+
 						long source = Bytes.toLong(rr.getValue(
-								Bytes.toBytes("subdue"), Bytes.toBytes("source")));
+								Bytes.toBytes("subdue"),
+								Bytes.toBytes("source")));
 						long target = Bytes.toLong(rr.getValue(
-								Bytes.toBytes("subdue"), Bytes.toBytes("target")));
+								Bytes.toBytes("subdue"),
+								Bytes.toBytes("target")));
 						String edge = new String(rr.getValue(
 								Bytes.toBytes("subdue"), Bytes.toBytes("edge")));
-					
-						String edgeStr = String.format("%s %s \"%s\"", source, target, edge);
+
+						String edgeStr = String.format("%s %s \"%s\"", source,
+								target, edge);
+						System.out.println(edgeStr);
 						edgeSet.add(edgeStr);
-						
+
 					}
 					rs.close();
-					
+
 					context.write(new Text("v"), value);
-	
+
 				}
 				for (String edge : edgeSet) {
 					context.write(new Text("e"), new Text(edge));
@@ -162,54 +167,45 @@ public class GraphSplitter {
 		}
 	}
 
-	public static void run(String dataset, String offset, String limit,
-			String output) {
+	public static void run(String dataset, String limit, String output) {
 		Configuration config = new Configuration();
 		config.set("dataset", dataset);
-		config.set("offset", offset);
-		config.set("limit", limit);
+		//config.set("offset", offset);
+		
 		try {
-			Job job = new Job(config);
-			job.setJarByClass(GraphSplitter.class);
-			job.setJobName(String.format("[LDClassifier]%s-splitter", dataset));
-
-			Scan scan = new Scan();
-			List<Filter> filterList = new ArrayList<Filter>();
-
-			Filter offsetFilter = new SingleColumnValueFilter(
-					Bytes.toBytes("subdue"), Bytes.toBytes("id"),
-					CompareFilter.CompareOp.GREATER_OR_EQUAL,
-					Bytes.toBytes(Long.parseLong(offset)));
-			Filter limitFilter = new SingleColumnValueFilter(
-					Bytes.toBytes("subdue"), Bytes.toBytes("id"),
-					CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes(Long
-							.parseLong(limit)));
-
+			
+			HTable datasetTable = new HTable(config, dataset);
+			
+			Scan countScan = new Scan();
+			
 			Filter vertexFilter = new SingleColumnValueFilter(
 					Bytes.toBytes("subdue"), Bytes.toBytes("type"),
 					CompareFilter.CompareOp.EQUAL, Bytes.toBytes("v"));
-			filterList.add(vertexFilter);
-			filterList.add(limitFilter);
-			filterList.add(offsetFilter);
-			FilterList fl = new FilterList(Operator.MUST_PASS_ALL, filterList);
-			scan.setFilter(fl);
-
-			TableMapReduceUtil.initTableMapperJob(dataset, scan,
-					GraphSplitterMapper.class, ImmutableBytesWritable.class,
-					Result.class, job);
-
-			FileOutputFormat.setOutputPath(job,
-					new Path(output + "/" + dataset.replace(".", "")));
-
-			job.setMapOutputKeyClass(ImmutableBytesWritable.class);
-			job.setMapOutputValueClass(Text.class);
-			job.setOutputKeyClass(ImmutableBytesWritable.class);
-			job.setOutputValueClass(Text.class);
-
-			job.setReducerClass(GraphSplitterReducer.class);
 			
-			job.waitForCompletion(true);
-
+			countScan.setFilter(vertexFilter);
+			
+			ResultScanner rs = datasetTable.getScanner(countScan);
+			long count = 0;
+			Result rr;
+			while ((rr = rs.next()) != null) {
+				count++;
+			}
+			datasetTable.close();
+			long longLimit = Long.parseLong(limit);
+			long fixedLimit = longLimit;
+			long offset = 1;
+			for(int i = 1; longLimit <= count; i++) {
+				config.setLong("limit", longLimit);
+				launchJob(dataset, output, config, vertexFilter, longLimit,
+						offset);
+				offset = fixedLimit * i + 1;
+				longLimit += fixedLimit;
+			}
+			
+			longLimit = count;
+			config.setLong("limit", longLimit);
+			launchJob(dataset, output, config, vertexFilter, longLimit,
+					offset);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -221,5 +217,48 @@ public class GraphSplitter {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void launchJob(String dataset, String output,
+			Configuration config, Filter vertexFilter, long longLimit,
+			long offset) throws IOException, InterruptedException,
+			ClassNotFoundException {
+		Job job = new Job(config);
+		job.setJarByClass(GraphSplitter.class);
+		job.setJobName(String.format("[LDClassifier]%s-splitter[%s-%s]", dataset, offset, longLimit));
+
+		Scan scan = new Scan();
+		List<Filter> filterList = new ArrayList<Filter>();
+
+		Filter offsetFilter = new SingleColumnValueFilter(
+				Bytes.toBytes("subdue"), Bytes.toBytes("id"),
+				CompareFilter.CompareOp.GREATER_OR_EQUAL,
+				Bytes.toBytes(offset));
+		Filter limitFilter = new SingleColumnValueFilter(
+				Bytes.toBytes("subdue"), Bytes.toBytes("id"),
+				CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes(longLimit));
+
+		
+		filterList.add(vertexFilter);
+		filterList.add(limitFilter);
+		filterList.add(offsetFilter);
+		FilterList fl = new FilterList(Operator.MUST_PASS_ALL, filterList);
+		scan.setFilter(fl);
+
+		TableMapReduceUtil.initTableMapperJob(dataset, scan,
+				GraphSplitterMapper.class, ImmutableBytesWritable.class,
+				Result.class, job);
+
+		FileOutputFormat.setOutputPath(job, new Path(String.format("%s/%s/%s-%s", output, dataset.replace(".", ""), offset, longLimit)));
+		
+		job.setMapOutputKeyClass(ImmutableBytesWritable.class);
+		job.setMapOutputValueClass(Text.class);
+		job.setOutputKeyClass(ImmutableBytesWritable.class);
+		job.setOutputValueClass(Text.class);
+
+		job.setReducerClass(GraphSplitterReducer.class);
+		
+		
+		job.submit();
 	}
 }
