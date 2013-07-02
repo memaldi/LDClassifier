@@ -36,7 +36,7 @@ public class VertexWriter {
 				String nodeClass = new String(result.getValue(
 						Bytes.toBytes("subdue"), Bytes.toBytes("class")));
 				result = table.get(get);
-				String id = new String(result.getValue(Bytes.toBytes("subdue"),
+				long id = Bytes.toLong(result.getValue(Bytes.toBytes("subdue"),
 						Bytes.toBytes("id")));
 				// System.out.println(nodeClass);
 				String line = String.format("%s %s", id, nodeClass);
@@ -76,7 +76,7 @@ public class VertexWriter {
 				vertexMap.put(index, node);
 			}
 
-			for (Long index : vertexMap.keySet()) {
+			for (long index : vertexMap.keySet()) {
 				//System.out.println(String.format("%s \"%s\"",
 				//					index.toString(), vertexMap.get(index)));
 				try {
@@ -86,7 +86,7 @@ public class VertexWriter {
 							new Text(String.format("%s \"%s\"",
 									index.toString(), vertexMap.get(index))));*/
 					context.write(new Text("v"), new Text(String.format("%s \"%s\"",
-									index.toString(), vertexMap.get(index))));
+									index, vertexMap.get(index))));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

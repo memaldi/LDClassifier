@@ -84,19 +84,19 @@ public class Graph {
 	}
 
 	public static class Vertex {
-		private Long id;
+		private long id;
 		private String label;
 		
-		public Vertex(Long id, String label) {
+		public Vertex(long id, String label) {
 			this.id = id;
 			this.label = label;
 		}
 
-		public Long getId() {
+		public long getId() {
 			return id;
 		}
 
-		public void setId(Long id) {
+		public void setId(long id) {
 			this.id = id;
 		}
 
@@ -112,11 +112,11 @@ public class Graph {
 	
 	public static class Edge {
 		private UUID id;
-		private Long source;
-		private Long target;
+		private long source;
+		private long target;
 		private String label;
 		
-		public Edge(Long source, Long target, String label) {
+		public Edge(long source, long target, String label) {
 			//this.id = id;
 			this.id = UUID.randomUUID();
 			this.source = source;
@@ -128,19 +128,19 @@ public class Graph {
 			return id;
 		}
 
-		public Long getSource() {
+		public long getSource() {
 			return source;
 		}
 
-		public void setSource(Long source) {
+		public void setSource(long source) {
 			this.source = source;
 		}
 
-		public Long getTarget() {
+		public long getTarget() {
 			return target;
 		}
 
-		public void setTarget(Long target) {
+		public void setTarget(long target) {
 			this.target = target;
 		}
 

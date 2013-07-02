@@ -28,12 +28,12 @@ public class EdgeWriter {
 				Get get = new Get(row);
 				Result result = table.get(get);
 				//System.out.println(result);
-				String source = new String(result.getValue(
+				long source = Bytes.toLong(result.getValue(
 						Bytes.toBytes("subdue"), Bytes.toBytes("source")));
-				result = table.get(get);
-				String target = new String(result.getValue(
+				//result = table.get(get);
+				long target = Bytes.toLong(result.getValue(
 						Bytes.toBytes("subdue"), Bytes.toBytes("target")));
-				result = table.get(get);
+				//result = table.get(get);
 				String edge = new String(result.getValue(
 						Bytes.toBytes("subdue"), Bytes.toBytes("edge")));
 				

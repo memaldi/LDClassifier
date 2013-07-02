@@ -11,3 +11,4 @@ input/*
 output/*
 utils/*
 hbase-site.xml
+queries/*
