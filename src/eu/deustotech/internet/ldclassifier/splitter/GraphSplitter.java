@@ -25,6 +25,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class GraphSplitter {
 
@@ -73,9 +75,13 @@ public class GraphSplitter {
 
 			Set<String> edgeSet = new HashSet<String>();
 
+			MultipleOutputs<Text, Text> mos = new MultipleOutputs<Text, Text>(context);
+			
 			String dataset = context.getConfiguration().get("dataset");
 			long limit = context.getConfiguration().getLong("limit", 0);
-			System.out.println(String.format("Limit: %s", limit));
+			String namedOutput = context.getConfiguration().get("namedOutput");
+			//System.out.println(String.format("NamedOutput: %s", namedOutput));
+			//System.out.println(String.format("Limit: %s", limit));
 			try {
 				HTable table = new HTable(context.getConfiguration(), dataset);
 
@@ -143,18 +149,21 @@ public class GraphSplitter {
 
 						String edgeStr = String.format("%s %s \"%s\"", source,
 								target, edge);
-						System.out.println(edgeStr);
+						//System.out.println(edgeStr);
 						edgeSet.add(edgeStr);
 
 					}
 					rs.close();
 
-					context.write(new Text("v"), value);
-
+					//context.write(new Text("v"), value);
+					
+					mos.write(namedOutput, new Text("v"), value);
 				}
 				for (String edge : edgeSet) {
-					context.write(new Text("e"), new Text(edge));
+					//context.write(new Text("e"), new Text(edge));
+					mos.write(namedOutput, new Text("e"), new Text(edge));
 				}
+				mos.close();
 				table.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -170,20 +179,20 @@ public class GraphSplitter {
 	public static void run(String dataset, String limit, String output) {
 		Configuration config = new Configuration();
 		config.set("dataset", dataset);
-		//config.set("offset", offset);
-		
+		// config.set("offset", offset);
+
 		try {
-			
+
 			HTable datasetTable = new HTable(config, dataset);
-			
+
 			Scan countScan = new Scan();
-			
+
 			Filter vertexFilter = new SingleColumnValueFilter(
 					Bytes.toBytes("subdue"), Bytes.toBytes("type"),
 					CompareFilter.CompareOp.EQUAL, Bytes.toBytes("v"));
-			
+
 			countScan.setFilter(vertexFilter);
-			
+
 			ResultScanner rs = datasetTable.getScanner(countScan);
 			long count = 0;
 			Result rr;
@@ -194,18 +203,21 @@ public class GraphSplitter {
 			long longLimit = Long.parseLong(limit);
 			long fixedLimit = longLimit;
 			long offset = 1;
-			for(int i = 1; longLimit <= count; i++) {
+			int i;
+			for (i = 1; longLimit <= count; i++) {
 				config.setLong("limit", longLimit);
+				config.set("namedOutput", String.format("%s0%s", dataset.replace(".", ""), i));
 				launchJob(dataset, output, config, vertexFilter, longLimit,
-						offset);
+						offset, i);
 				offset = fixedLimit * i + 1;
 				longLimit += fixedLimit;
 			}
-			
 			longLimit = count;
 			config.setLong("limit", longLimit);
-			launchJob(dataset, output, config, vertexFilter, longLimit,
-					offset);
+						
+			config.set("namedOutput", String.format("%s0%s", dataset.replace(".", ""), i));
+			launchJob(dataset, output, config, vertexFilter, longLimit, offset,
+					i);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -221,24 +233,27 @@ public class GraphSplitter {
 
 	private static void launchJob(String dataset, String output,
 			Configuration config, Filter vertexFilter, long longLimit,
-			long offset) throws IOException, InterruptedException,
+			long offset, int part) throws IOException, InterruptedException,
 			ClassNotFoundException {
 		Job job = new Job(config);
 		job.setJarByClass(GraphSplitter.class);
-		job.setJobName(String.format("[LDClassifier]%s-splitter[%s-%s]", dataset, offset, longLimit));
+		job.setJobName(String.format("[LDClassifier]%s-splitter[%s-%s]",
+				dataset, offset, longLimit));
+		
+		MultipleOutputs.addNamedOutput(job,
+				String.format("%s0%s", dataset.replace(".", ""), part),
+				TextOutputFormat.class, Text.class, Text.class);
 
 		Scan scan = new Scan();
 		List<Filter> filterList = new ArrayList<Filter>();
 
 		Filter offsetFilter = new SingleColumnValueFilter(
 				Bytes.toBytes("subdue"), Bytes.toBytes("id"),
-				CompareFilter.CompareOp.GREATER_OR_EQUAL,
-				Bytes.toBytes(offset));
+				CompareFilter.CompareOp.GREATER_OR_EQUAL, Bytes.toBytes(offset));
 		Filter limitFilter = new SingleColumnValueFilter(
 				Bytes.toBytes("subdue"), Bytes.toBytes("id"),
 				CompareFilter.CompareOp.LESS_OR_EQUAL, Bytes.toBytes(longLimit));
 
-		
 		filterList.add(vertexFilter);
 		filterList.add(limitFilter);
 		filterList.add(offsetFilter);
@@ -249,16 +264,18 @@ public class GraphSplitter {
 				GraphSplitterMapper.class, ImmutableBytesWritable.class,
 				Result.class, job);
 
-		FileOutputFormat.setOutputPath(job, new Path(String.format("%s/%s/%s-%s", output, dataset.replace(".", ""), offset, longLimit)));
-		
+		FileOutputFormat.setOutputPath(
+				job,
+				new Path(String.format("%s/%s/%s-%s", output,
+						dataset.replace(".", ""), offset, longLimit)));
+
 		job.setMapOutputKeyClass(ImmutableBytesWritable.class);
 		job.setMapOutputValueClass(Text.class);
 		job.setOutputKeyClass(ImmutableBytesWritable.class);
 		job.setOutputValueClass(Text.class);
 
 		job.setReducerClass(GraphSplitterReducer.class);
-		
-		
+
 		job.submit();
 	}
 }
