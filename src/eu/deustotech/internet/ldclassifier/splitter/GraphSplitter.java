@@ -75,13 +75,15 @@ public class GraphSplitter {
 
 			Set<String> edgeSet = new HashSet<String>();
 
-			MultipleOutputs<Text, Text> mos = new MultipleOutputs<Text, Text>(context);
-			
+			MultipleOutputs<Text, Text> mos = new MultipleOutputs<Text, Text>(
+					context);
+
 			String dataset = context.getConfiguration().get("dataset");
 			long limit = context.getConfiguration().getLong("limit", 0);
 			String namedOutput = context.getConfiguration().get("namedOutput");
-			//System.out.println(String.format("NamedOutput: %s", namedOutput));
-			//System.out.println(String.format("Limit: %s", limit));
+			// System.out.println(String.format("NamedOutput: %s",
+			// namedOutput));
+			// System.out.println(String.format("Limit: %s", limit));
 			try {
 				HTable table = new HTable(context.getConfiguration(), dataset);
 
@@ -149,18 +151,18 @@ public class GraphSplitter {
 
 						String edgeStr = String.format("%s %s \"%s\"", source,
 								target, edge);
-						//System.out.println(edgeStr);
+						// System.out.println(edgeStr);
 						edgeSet.add(edgeStr);
 
 					}
 					rs.close();
 
-					//context.write(new Text("v"), value);
-					
+					// context.write(new Text("v"), value);
+
 					mos.write(namedOutput, new Text("v"), value);
 				}
 				for (String edge : edgeSet) {
-					//context.write(new Text("e"), new Text(edge));
+					// context.write(new Text("e"), new Text(edge));
 					mos.write(namedOutput, new Text("e"), new Text(edge));
 				}
 				mos.close();
@@ -206,7 +208,8 @@ public class GraphSplitter {
 			int i;
 			for (i = 1; longLimit <= count; i++) {
 				config.setLong("limit", longLimit);
-				config.set("namedOutput", String.format("%s0%s", dataset.replace(".", ""), i));
+				config.set("namedOutput", String.format("%s0%s", dataset
+						.replace(".", "").replace("-", ""), i));
 				launchJob(dataset, output, config, vertexFilter, longLimit,
 						offset, i);
 				offset = fixedLimit * i + 1;
@@ -214,8 +217,11 @@ public class GraphSplitter {
 			}
 			longLimit = count;
 			config.setLong("limit", longLimit);
-						
-			config.set("namedOutput", String.format("%s0%s", dataset.replace(".", ""), i));
+
+			config.set(
+					"namedOutput",
+					String.format("%s0%s",
+							dataset.replace(".", "").replace("-", ""), i));
 			launchJob(dataset, output, config, vertexFilter, longLimit, offset,
 					i);
 		} catch (IOException e) {
@@ -239,9 +245,9 @@ public class GraphSplitter {
 		job.setJarByClass(GraphSplitter.class);
 		job.setJobName(String.format("[LDClassifier]%s-splitter[%s-%s]",
 				dataset, offset, longLimit));
-		
+
 		MultipleOutputs.addNamedOutput(job,
-				String.format("%s0%s", dataset.replace(".", ""), part),
+				String.format("%s0%s", dataset.replace(".", "").replace("-", ""), part),
 				TextOutputFormat.class, Text.class, Text.class);
 
 		Scan scan = new Scan();
