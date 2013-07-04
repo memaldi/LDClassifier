@@ -55,7 +55,7 @@ public class EdgeGenerator {
 				
 				Get get = new Get(value.getRow());
 				Result r = table.get(get);
-				
+				//System.out.println(new String(value.getRow()));
 				NavigableMap<byte[], byte[]> objects = r.getFamilyMap(Bytes.toBytes("o"));
 				NavigableMap<byte[], byte[]> properties = r.getFamilyMap(Bytes
 						.toBytes("p"));
@@ -107,7 +107,7 @@ public class EdgeGenerator {
 			fs = FileSystem.get(edgeConfig);
 			//Set<String> datasets = LaunchUtils.getDatasets(input + "/part-r-00000", fs);
 			//for (String dataset : datasets) {
-				Job vertexJob = LaunchUtils.launch(null, "EdgeGenerator", null,
+				Job vertexJob = LaunchUtils.launch(null, "EdgeGenerator", "v",
 						dataset, edgeConfig, EdgeGeneratorMapper.class, null);
 				vertexJob.waitForCompletion(true);
 			//}
