@@ -68,15 +68,21 @@ public class EdgeGenerator {
 					Result dr = datasetTable.get(dGet);
 					
 					if (!dr.isEmpty()) {
-						byte[] oID = dr.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id"));
-						byte[] id = value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id"));
+						//System.out.println(value.toString());
+						//System.out.println(new String(value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("type"))));
+						//System.out.println(new String(value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("class"))));
+						
+						long oID = Bytes.toLong(dr.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id")));
+						//System.out.println(Bytes.toLong(dr.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id"))));
+						
+						long id = Bytes.toLong(value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id")));
 						
 						long count = context.getCounter(counter.EDGE_COUNTER)
 								.getValue();
 						context.getCounter(counter.EDGE_COUNTER).increment(1);
-						Put p = new Put(Bytes.toBytes(String.valueOf(count)));
-						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("source"), id);
-						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("target"), oID);
+						Put p = new Put(Bytes.toBytes(count));
+						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("source"), Bytes.toBytes(id));
+						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("target"), Bytes.toBytes(oID));
 						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("edge"),
 								Bytes.toBytes(property));
 						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("type"),
