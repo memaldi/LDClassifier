@@ -201,6 +201,7 @@ public class GraphSplitter {
 			while ((rr = rs.next()) != null) {
 				count++;
 			}
+			rs.close();
 			datasetTable.close();
 			long longLimit = Long.parseLong(limit);
 			long fixedLimit = longLimit;
@@ -282,6 +283,6 @@ public class GraphSplitter {
 
 		job.setReducerClass(GraphSplitterReducer.class);
 
-		job.submit();
+		job.waitForCompletion(true);
 	}
 }

@@ -52,7 +52,7 @@ public class EdgeGenerator {
 			try {
 				HTable datasetTable = new HTable(config, context.getConfiguration().get("dataset"));
 				HTable table = new HTable(config, "datasets");
-				
+
 				Get get = new Get(value.getRow());
 				Result r = table.get(get);
 				//System.out.println(new String(value.getRow()));
@@ -63,7 +63,7 @@ public class EdgeGenerator {
 				for (byte[] objectKey : objects.keySet()) {
 					String object = new String(objects.get(objectKey));
 					String property = new String(properties.get(objectKey));
-					
+
 					Get dGet = new Get(Bytes.toBytes(object));
 					Result dr = datasetTable.get(dGet);
 					
@@ -71,12 +71,12 @@ public class EdgeGenerator {
 						//System.out.println(value.toString());
 						//System.out.println(new String(value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("type"))));
 						//System.out.println(new String(value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("class"))));
-						
+
 						long oID = Bytes.toLong(dr.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id")));
 						//System.out.println(Bytes.toLong(dr.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id"))));
-						
+
 						long id = Bytes.toLong(value.getValue(Bytes.toBytes("subdue"), Bytes.toBytes("id")));
-						
+
 						long count = context.getCounter(counter.EDGE_COUNTER)
 								.getValue();
 						context.getCounter(counter.EDGE_COUNTER).increment(1);
@@ -87,7 +87,7 @@ public class EdgeGenerator {
 								Bytes.toBytes(property));
 						p.add(Bytes.toBytes("subdue"), Bytes.toBytes("type"),
 								Bytes.toBytes("e"));
-						
+
 						datasetTable.put(p);
 						
 					}
