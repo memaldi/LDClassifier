@@ -10,18 +10,22 @@ it = 1
 offset = 0
 
 sparql_endpoint = sys.argv[1]
-limit = int(sys.argv[2])
+original_limit = int(sys.argv[2])
 output = sys.argv[3]
+format = sys.argv[4]
 
 f = open(output, 'w')
 
+limit = original_limit
+
 while not end:
     query = 'SELECT DISTINCT * WHERE { ?s ?p ?o } OFFSET %s LIMIT %s' % (str(offset), str(limit))
+    print query
     #params = {'query': query, 'output': 'json', 'format': 'application/sparql-results+json'}
     #headers = {'Accept': 'application/json, application/sparql-results+json'}
     #self.sparql_http_connection.request('GET', self.route + '?' + urllib.urlencode(params))
     #response = self.sparql_http_connection.getresponse()
-    params = urllib.urlencode({'query': query, 'output': 'json', 'format': 'application/sparql-results+json'})
+    params = urllib.urlencode({'query': query, 'output': 'json', 'format': format})
     request = urllib2.Request(sparql_endpoint + '?' + params)
     request.add_header('Accept', 'application/rdf+xml, application/sparql-results+json')
     retries = 1
@@ -57,14 +61,16 @@ while not end:
                 f.write(output_str.encode('utf-8'))
         else:
             end = True
+	    break
     if (offset + limit) % 1000 == 0:
-        print 'Writed %s triples...' % (offset + limit)
+        print 'Writed %s triples...' % (offset + original_limit)
     if (offset + limit) % 10000 == 0:
         print 'Wating 30 secs...'
         sys.stdout.flush()
         time.sleep(30)
         print 'Ready!'
-    offset = (limit * it)
+    offset = (original_limit * it)
+    limit += original_limit
     it = it + 1
 
     sys.stdout.flush()
